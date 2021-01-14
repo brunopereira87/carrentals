@@ -6,7 +6,9 @@ use \core\Controller;
 class ErrorController extends Controller {
 
     public function index() {
-        $this->render('404');
+        echo json_encode([
+            'error' => 'Endpoint não encontrado'
+        ]);
     }
 
 }
