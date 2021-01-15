@@ -2,7 +2,6 @@
 
 namespace src\controllers;
 
-use src\Config;
 use core\Controller;
 use Firebase\JWT\JWT;
 use src\Response;
@@ -23,7 +22,7 @@ class AuthController extends Controller{
       $response['error'] = 'Nome, email e senha são campos obrigatórios';
       Response::send($response);
     }
-    $date = new \DateTime("now");
+
 
     $user = User::select()->where('email',$email)->execute();
     if(count($user) > 0){
@@ -36,23 +35,14 @@ class AuthController extends Controller{
       'email' => $email,
       'password' => password_hash($password,PASSWORD_DEFAULT)
       ])->execute();
-
     
-    $payload = [
-      'iat' => $date,
-      'data' => [
-        'name' => $name,
-        'email' => $email
-        ]
-      ];
-    
-    
+    $id = intval($id);
     $response['data'] = [
-      'id' => intval($id),
+      'id' => $id,
       'name' => $name,
       'email' => $email
     ];
-    $response['token'] = JWT::encode($payload, Config::SECRET);
+    $response['token'] = User::createToken($id, $name,$email);
 
     Response::send($response);
   }
@@ -68,29 +58,33 @@ class AuthController extends Controller{
       Response::send($response);
     }
     
-    $user = User::select()->where('email',$email)->execute();
+    $users = User::select()->where('email',$email)->execute();
 
-    if((count($user) === 0) || password_verify($password, $user[0]['password']) === false){
+    if((count($users) === 0) || password_verify($password, $users[0]['password']) === false){
       $response['error'] = 'Email e/ou senha inválido';     
       Response::send($response);
     }
-
+    $user = $users[0];
     $response['data'] = [
-      'id' => intval($user[0]['id']),
-      'name' => $user[0]['name'],
+      'id' => intval($user['id']),
+      'name' => $user['name'],
       'email' => $email
     ];
 
-    $response['token'] = $this->getToken($user[0]['name'], $email);
+    $response['token'] = User::createToken($user['id'], $user['name'], $email);
     Response::send($response);
   }
-  public function logout(){
-    echo 'logout';
-  }
+
   public function logged(){
-    echo 'logged';
+    $user = User::auth();
+
+    $response = [
+      'data' => $user
+    ];
+    Response::send($response);
   }
 
+  
   private function getRequest(){
     $postdata = file_get_contents('php://input');
     
@@ -103,17 +97,6 @@ class AuthController extends Controller{
     return $request;
   }
 
-  private function getToken($name, $email){
-    $date = new \DateTime("now");
-    $payload = [
-      'iat' => $date,
-      'data' => [
-        'name' => $name,
-        'email' => $email
-        ]
-      ];
-    
-    return JWT::encode($payload, Config::SECRET);
-  }
+  
 
 }

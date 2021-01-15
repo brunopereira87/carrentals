@@ -8,7 +8,7 @@ class Helpers {
     return (json_last_error() == JSON_ERROR_NONE);
   }
 
-  private function getAuthorizationHeader(){
+  public static function getAuthorizationHeader(){
     $headers = null;
     if (isset($_SERVER['Authorization'])) {
         $headers = trim($_SERVER["Authorization"]);
@@ -30,7 +30,7 @@ class Helpers {
   * get access token from header
   * */
   public static function getBearerToken() {
-    $headers = $this->getAuthorizationHeader();
+    $headers = self::getAuthorizationHeader();
     // HEADER: Get the access token from the header
     if (!empty($headers)) {
         if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {

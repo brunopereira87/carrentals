@@ -9,7 +9,6 @@ $prefix = '/auth';
 
 $router->post("$prefix/register","AuthController@register");
 $router->post("$prefix/login","AuthController@login");
-$router->post("$prefix/logout","AuthController@logout");
 $router->get("$prefix/logged","AuthController@logged");
 
 // $router->put("/users/edit","UserController@update");
