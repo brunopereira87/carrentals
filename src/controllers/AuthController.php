@@ -14,9 +14,9 @@ class AuthController extends Controller{
     $response = ['error' => ''];
     $request = Helpers::getRequest();
 
-    $name = filter_var($request['name'],FILTER_SANITIZE_SPECIAL_CHARS) ?? null;
-    $email = filter_var($request['email'], FILTER_VALIDATE_EMAIL) ?? null;
-    $password = filter_var($request['password'], FILTER_SANITIZE_STRING) ?? null;
+    $name = Helpers::getInput($request,'name',FILTER_SANITIZE_SPECIAL_CHARS);
+    $email = Helpers::getInput($request,'email', FILTER_VALIDATE_EMAIL);
+    $password = Helpers::getInput($request,'password', FILTER_SANITIZE_STRING);
 
     if(!($name && $email && $password)){
       Response::sendErrorMessage('Nome, email e senha são campos obrigatórios');
@@ -48,8 +48,8 @@ class AuthController extends Controller{
     $response = ['error' => ''];
     $request = Helpers::getRequest();
 
-    $email = filter_var($request['email'], FILTER_VALIDATE_EMAIL) ?? null;
-    $password = filter_var($request['password'], FILTER_SANITIZE_STRING) ?? null;
+    $email = Helpers::getInput($request,'email', FILTER_VALIDATE_EMAIL);
+    $password = Helpers::getInput($request,'password', FILTER_SANITIZE_STRING);
 
     if(!( $email && $password)){
       Response::sendErrorMessage('Email e senha são campos obrigatórios');

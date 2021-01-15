@@ -41,11 +41,6 @@ class User extends Model{
 
     if(count($users) === 0) {
       Response::sendErrorMessage('Token inválido');
-
-      $response = [
-        'error' => 'Não autoriazado'
-      ];
-      Response::send($response);
     }
 
     return $users[0];

@@ -34,6 +34,7 @@ class Car extends Model{
       $user = null;
     }
     $car = [
+      'id'=> $rawCar['id'],
       'name' => $rawCar['name'],
       'plate' => $rawCar['plate'],
       'company' => $rawCar['company'],
