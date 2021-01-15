@@ -18,9 +18,5 @@ $router->get("$prefix",'CarsController@read');
 $router->get("$prefix/{id}",'CarsController@read');
 $router->put("$prefix/{id}",'CarsController@update');
 $router->delete("$prefix/{id}",'CarsController@delete');
-
-// $prefix = '/rental';
-
-// $router->post("$prefix/create",'RentalController@rent');
-// $router->post("$prefix/create",'RentalController@rent');
-// $router->put("$prefix/{id}/return",'RentalController@return');
+$router->put("$prefix/{id}/rent",'CarsController@rent');
+$router->put("$prefix/{id}/return",'CarsController@return');

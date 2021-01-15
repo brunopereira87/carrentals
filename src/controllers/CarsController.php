@@ -20,11 +20,11 @@ class CarsController extends Controller{
     $name = Helpers::getInput($request,'name',FILTER_SANITIZE_SPECIAL_CHARS);
     $plate = Helpers::getInput( $request,'plate', FILTER_SANITIZE_STRING);
     $company = Helpers::getInput($request,'company',FILTER_SANITIZE_SPECIAL_CHARS);
-    $day_rental_price = Helpers::getInput($request,'day_rental_price',FILTER_VALIDATE_FLOAT);
+    $rental_price = Helpers::getInput($request,'rental_price',FILTER_VALIDATE_FLOAT);
 
-    if(!($name && $day_rental_price)){
+    if(!($name && $rental_price)){
       Response::sendErrorMessage(
-        'Os campos name e day_rental_price são obrigatório e devem ser preenchidos corretamente'
+        'Os campos name e rental_price são obrigatório e devem ser preenchidos corretamente'
       );
     }
 
@@ -32,7 +32,7 @@ class CarsController extends Controller{
       'name' => $name,
       'plate' => $plate,
       'company' => $company,
-      'day_rental_price' => $day_rental_price,
+      'rental_price' => $rental_price,
     ];
     
     $lastCarId = Car::insert($car)->execute();
@@ -47,10 +47,10 @@ class CarsController extends Controller{
     try{
       if(isset($args['id'])){
         $car = Car::getCar($args['id']);
-        $response['data'] = $cars[0];
+        $response['data'] = $car;
       }
       else{
-        $cars = Car::select()->execute();
+        $cars = Car::getCars();
         $response['data'] = $cars;
       }
     }
@@ -72,7 +72,7 @@ class CarsController extends Controller{
     $name = Helpers::getInput($request,'name',FILTER_SANITIZE_SPECIAL_CHARS);
     $plate = Helpers::getInput( $request,'plate', FILTER_SANITIZE_STRING);
     $company = Helpers::getInput($request,'company',FILTER_SANITIZE_SPECIAL_CHARS);
-    $day_rental_price = Helpers::getInput($request,'day_rental_price',FILTER_VALIDATE_FLOAT);
+    $rental_price = Helpers::getInput($request,'rental_price',FILTER_VALIDATE_FLOAT);
 
     $updateArray = [];
     if($name){
@@ -84,8 +84,8 @@ class CarsController extends Controller{
     if($company){
       $updateArray['company'] = $company;
     }
-    if($day_rental_price){
-      $updateArray['day_rental_price'] = $day_rental_price;
+    if($rental_price){
+      $updateArray['rental_price'] = $rental_price;
     }
 
     Car::update()
@@ -106,5 +106,64 @@ class CarsController extends Controller{
 
     Car::delete($args['id']);
     Response::send([]);
+  }
+
+  public function rent($args){
+    User::authorize();
+    if(!(isset($args['id']))){
+      Response::sendErrorMessage('Id do carro não enviado');
+    }
+    
+    $car = Car::getCar($args['id']);
+
+    if($car['rented'] == 1) {
+      Response::sendErrorMessage('Este caro já está alugado');
+    }
+    $request = Helpers::getRequest();
+    $rental_user_id = Helpers::getInput($request,'rental_user_id',FILTER_VALIDATE_INT);
+    
+    if(!$rental_user_id){
+      Response::sendErrorMessage('O id do usuário que está alugando o carro é obrigatório');
+    }
+
+    if(!User::exists($rental_user_id)){
+      Response::sendErrorMessage('Usuário não encontrado');
+    }
+    $updateArray = [
+      'rented' => 1,
+      'rental_user_id' => $rental_user_id,
+    ];
+
+    Car::update()
+      ->set($updateArray)
+      ->where('id',$args['id'])
+      ->execute();
+    
+    Response::send(['message' => 'Carro alugado com sucesso']);
+  }
+
+  public function return($args){
+    User::authorize();
+    if(!(isset($args['id']))){
+      Response::sendErrorMessage('Id do carro não enviado');
+    }
+    
+    $car = Car::getCar($args['id']);
+
+    if($car['rented'] == 0) {
+      Response::sendErrorMessage('Este caro não está alugado');
+    }
+    
+    $updateArray = [
+      'rented' => 0,
+      'rental_user_id' => null,
+    ];
+
+    Car::update()
+      ->set($updateArray)
+      ->where('id',$args['id'])
+      ->execute();
+    
+    Response::send(['message' => 'Carro devolvido com sucesso']);
   }
 }

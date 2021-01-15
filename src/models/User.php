@@ -59,4 +59,22 @@ class User extends Model{
 
     Response::sendErrorMessage('Você não tem permissão para acessar essa área');
   }
+
+  public static function getUser($id){
+    $users = User::select(['id','name','email'])->where('id',$id)->execute();
+    if(count($users)){
+      return $users[0];
+    }
+
+    return null;
+  }
+  public static function exists($id){
+    if(!$id){
+      Response::sendErrorMessage('Id não enviado');
+    }
+
+    $users = self::select(['id','name','email'])->where('id',$id)->execute();
+
+    return count($users) > 0;
+  }
 }

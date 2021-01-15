@@ -14,6 +14,34 @@ class Car extends Model{
       Response::sendErrorMessage('Carro não encontrado');
     }
 
-    return $cars[0];
+    $firstCar = $cars[0]; 
+    $car = self::formatCarResponse($firstCar);
+
+    return $car;
+  }
+
+  public static function getCars(){
+    $rawCars = Car::select()->execute();
+    $cars = array_map(fn($rawCar) => self::formatCarResponse($rawCar),$rawCars);
+
+    return $cars;
+  }
+  public static function formatCarResponse($rawCar){
+    if($rawCar['rented'] == 1){
+      $user = User::getUser($rawCar['rental_user_id']);
+    }
+    else {
+      $user = null;
+    }
+    $car = [
+      'name' => $rawCar['name'],
+      'plate' => $rawCar['plate'],
+      'company' => $rawCar['company'],
+      'rental_price' => doubleval($rawCar['rental_price']),
+      'rented' => intval($rawCar['rented']),
+      'rental_user' => $user
+    ];
+
+    return $car;
   }
 }
