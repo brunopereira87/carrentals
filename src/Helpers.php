@@ -39,4 +39,24 @@ class Helpers {
     }
     return null;
   }
+
+  public static function getRequest(){
+    $postdata = file_get_contents('php://input');
+    
+    if(Helpers::isJson($postdata)){
+      $request = json_decode($postdata,true);
+    } else {
+      parse_str($postdata,$request);
+    }
+    
+    return $request;
+  }
+  
+  public static function getInput($request,$field, $filter){
+    if(array_key_exists($field, $request)){
+      return filter_var($request[$field],$filter) ?? null;
+    }
+    
+    return null;
+  }
 }

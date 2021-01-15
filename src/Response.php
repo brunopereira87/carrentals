@@ -10,4 +10,11 @@ class Response {
     echo json_encode($array);
     exit;
   }
+
+  public static function sendErrorMessage($message){
+    $response = [
+      'error' => $message
+    ];
+    Response::send($response);
+  }
 }
